@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumiendo API</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+</head>
+<body class="container">
+    <div class="search-container">
+        <h1 class="title">Rick and Morty</h1>
+        <form id="search-form" class="search-form">
+            <input type="text" id="character-name" name="name" class="search-input" placeholder="Ingresa un nombre">
+            <button type="submit" class="search-button">Buscar</button>
+        </form>
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        document.getElementById("search-form").addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById("character-name").value;
+            fetch(`/search?name=${encodeURIComponent(name)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p>${data.error}</p>`;
+                    } else {
+                        const characters = data.results;
+                        characters.forEach(character => {
+                            const characterDiv = document.createElement('div');
+                            characterDiv.classList.add('character-card');
+                            characterDiv.innerHTML = `
+                                <h2>${character.name}</h2>
+                                <img src="${character.image}" alt="${character.name}">
+                                <p>Status: ${character.status}</p>
+                                <p>Species: ${character.species}</p>
+                                <p>Gender: ${character.gender}</p>
+                                <p>Origin: ${character.origin.name}</p>
+                                <p>Location: ${character.location.name}</p>
+                                <p>First seen in: ${character.episode[0]}</p>
+                            `;
+                            resultsDiv.appendChild(characterDiv);
+                        });
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('results').innerHTML = `<p>Error: ${error}</p>`;
+                });
+        });
+    </script>
+</body>
+</html>
